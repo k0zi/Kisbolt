@@ -1,0 +1,77 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rice="clr-namespace:KD.Avalonia.Rice.Controls;assembly=KD.Avalonia.Rice"
+             xmlns:icons="clr-namespace:Material.Icons;assembly=Material.Icons"
+             xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:l="using:Kisbolt.App.Localization"
+             xmlns:vm="using:Kisbolt.App.ViewModels"
+             x:Class="Kisbolt.App.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="24" Spacing="20" MaxWidth="760" HorizontalAlignment="Left">
+      <TextBlock FontSize="24" FontWeight="SemiBold" Text="{l:Tr Settings}" />
+
+      <rice:RiceGroupBox Header="{l:Tr System}" Icon="{x:Static icons:MaterialIconKind.Linux}">
+        <Grid ColumnDefinitions="Auto,16,*" RowDefinitions="Auto,6,Auto">
+          <TextBlock Text="{l:Tr Platform}" Foreground="{DynamicResource RiceForegroundMutedBrush}" />
+          <TextBlock Grid.Column="2" Text="{Binding PlatformText}" TextWrapping="Wrap" />
+          <TextBlock Grid.Row="2" Text="{l:Tr Data}" Foreground="{DynamicResource RiceForegroundMutedBrush}" />
+          <SelectableTextBlock Grid.Row="2" Grid.Column="2" Text="{Binding DataDirectory}" TextWrapping="Wrap" />
+        </Grid>
+      </rice:RiceGroupBox>
+
+      <rice:RiceGroupBox Header="{l:Tr ApiTokens}" Icon="{x:Static icons:MaterialIconKind.KeyOutline}">
+        <StackPanel Spacing="12">
+          <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource RiceForegroundMutedBrush}"
+                     Text="{l:Tr ApiTokensHint}" />
+          <ItemsControl ItemsSource="{Binding Tokens}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:SettingsViewModel+TokenItem">
+                <DockPanel Margin="0,2">
+                  <Button DockPanel.Dock="Right" Padding="6" Command="{Binding RemoveCommand}"
+                          CommandParameter="{Binding}" ToolTip.Tip="{l:Tr Delete}">
+                    <mi:MaterialIcon Kind="DeleteOutline" />
+                  </Button>
+                  <TextBlock Text="{Binding Host}" FontWeight="SemiBold" Width="240" VerticalAlignment="Center" />
+                  <TextBlock Text="{Binding MaskedToken}" VerticalAlignment="Center"
+                             Foreground="{DynamicResource RiceForegroundMutedBrush}" />
+                </DockPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Grid ColumnDefinitions="240,8,*,8,Auto">
+            <TextBox PlaceholderText="{l:Tr HostPlaceholder}" Text="{Binding NewHost}" />
+            <TextBox Grid.Column="2" PlaceholderText="{l:Tr Token}" PasswordChar="•" Text="{Binding NewToken}" />
+            <Button Grid.Column="4" Classes="accent" Content="{l:Tr Save}" Command="{Binding SaveTokenCommand}" />
+          </Grid>
+          <TextBlock Text="{Binding Message}" IsVisible="{Binding HasMessage}" TextWrapping="Wrap" />
+        </StackPanel>
+      </rice:RiceGroupBox>
+
+      <rice:RiceGroupBox Header="{l:Tr MetadataHeader}" Icon="{x:Static icons:MaterialIconKind.InformationOutline}">
+        <StackPanel Spacing="8">
+          <TextBlock TextWrapping="Wrap"
+                     Text="{l:Tr MetadataHint}" />
+          <Border Padding="12" CornerRadius="8" Background="{DynamicResource RiceSurfaceAltBrush}">
+            <SelectableTextBlock FontFamily="monospace"
+                                 Text="{}{&#10;  &quot;name&quot;: &quot;My App&quot;,&#10;  &quot;version&quot;: &quot;1.2.3&quot;,&#10;  &quot;author&quot;: &quot;Jane Doe&quot;,&#10;  &quot;icon&quot;: &quot;icon.png&quot;&#10;}" />
+          </Border>
+        </StackPanel>
+      </rice:RiceGroupBox>
+
+      <rice:RiceGroupBox Header="{l:Tr Language}" Icon="{x:Static icons:MaterialIconKind.Translate}">
+        <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" MinWidth="240">
+          <ComboBox.ItemTemplate>
+            <DataTemplate x:DataType="l:Language">
+              <TextBlock Text="{Binding NativeName}" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+      </rice:RiceGroupBox>
+
+      <rice:RiceGroupBox Header="{l:Tr Appearance}" Icon="{x:Static icons:MaterialIconKind.PaletteOutline}">
+        <rice:ThemeSelector />
+      </rice:RiceGroupBox>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

@@ -1,0 +1,69 @@
+# Kisbolt
+
+<p align="center">
+  <img src="docs/assets/kisbolt-header.png" alt="Kisbolt — Server und fließende Daten" width="900" />
+</p>
+
+[English](README.md) | **Deutsch** | [Français](README.fr.md) | [Español](README.es.md) | [Português](README.pt.md) | [中文](README.zh.md) | [日本語](README.ja.md) | [Magyar](README.hu.md)
+
+Ein Desktop-Software-Store (Avalonia 12 + [KD.Avalonia.Rice](https://www.nuget.org/packages/KD.Avalonia.Rice)).
+Er hat keinen eigenen Katalog: Man fügt GitHub-, GitLab- (gitlab.com oder selbst gehostet) und Codeberg-Repositorys
+(Forgejo/Gitea) hinzu, Kisbolt wählt aus deren Releases das zum System passende Paket aus und installiert es mit dem
+**Installer des Host-Betriebssystems**:
+
+| System | Paket | Installer |
+|--------|-------|-----------|
+| Debian / Ubuntu und Derivate | `.deb` | `pkexec apt-get` |
+| Fedora / RHEL | `.rpm` | `pkexec dnf` |
+| openSUSE / SLES | `.rpm` | `pkexec zypper` |
+| Windows | `.msi`, `.exe` | `msiexec` / der Installer selbst (UAC) |
+
+## Funktionsweise
+
+- **Repository hinzufügen**: Der Store übernimmt ein Repository nur, wenn es ein Release mit einem Paket für das
+  aktuelle System (Format + Architektur) gibt. Andernfalls wird angezeigt, warum nicht.
+- **Hauptbildschirm**: oben die installierten, unten die installierbaren Anwendungen, je Gruppe 20 pro Seite.
+- **Updates**: pro installierter Anwendung oder für alle auf einmal nach Updates suchen und installieren.
+- **Status**: Beim Start prüft Kisbolt, ob die installierten Pakete noch vorhanden sind (extern entfernt → die Anwendung
+  kommt zurück in die Liste der installierbaren).
+- **API-Tokens**: optionaler Token pro Host (Rate-Limits, private Repositorys) in den Einstellungen.
+- **Sprache**: Die Oberfläche gibt es auf Englisch (Standard), Deutsch, Französisch, Spanisch, Portugiesisch,
+  Chinesisch, Japanisch und Ungarisch; umschalten in den Einstellungen, die Änderung gilt sofort.
+- **Daten**: SQLite, `~/.local/share/kisbolt/kisbolt.db` (Windows: `%LOCALAPPDATA%\kisbolt\kisbolt.db`), Icons daneben im
+  Ordner `icons`.
+
+## `.kisbolt`-Metadaten
+
+Ein Repository kann in der Datei `.kisbolt/kisbolt.json` festlegen, wie es im Store erscheint:
+
+```json
+{
+  "name": "My App",
+  "version": "1.2.3",
+  "author": "Jemand",
+  "icon": "icon.png"
+}
+```
+
+- Alle Felder sind optional; fehlender Name → Name des Repositorys, fehlender Autor → Eigentümer des Repositorys.
+- `icon` ist ein Pfad relativ zum Ordner `.kisbolt` (png, jpg, webp, ico, bmp) und darf nicht aus dem Ordner
+  herauszeigen.
+- Der Store liest die Datei beim Hinzufügen und bei jeder Update-Suche neu ein.
+- Legt der Benutzer ein eigenes Icon für eine Anwendung fest, wird es lokal gespeichert und der Store liest den
+  Ordner `.kisbolt` ab dann nicht mehr (zurückschalten mit dem Menüpunkt *Symbol zurücksetzen (.kisbolt)*).
+
+## Entwicklung
+
+```sh
+dotnet build
+dotnet test
+dotnet run --project src/Kisbolt.App
+```
+
+- `src/Kisbolt.Core` – Datenmodell (EF Core + SQLite), Forge-Clients, Paketauswahl, Installer, `StoreService`.
+- `src/Kisbolt.App` – Avalonia-Oberfläche (MVVM, CommunityToolkit.Mvvm).
+- `src/Kisbolt.*/Resources/Strings*.resx` – Oberflächen- und Meldungstexte, eine Datei pro Sprache (`Strings.resx` ist
+  Englisch).
+- `tests/Kisbolt.Core.Tests` – xUnit-Tests.
+
+Neue Migration: `dotnet ef migrations add <Name> --project src/Kisbolt.Core --output-dir Data/Migrations`.
